@@ -1,0 +1,55 @@
+{
+  "name": "teamradhq/dice-rolls",
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": "^8.4",
+    "laravel/framework": "^13",
+    "laravel/tinker": "^3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^13.1",
+    "phpstan/phpstan": "^2.1",
+    "rector/rector": "^2.4",
+    "laravel/pint": "^1.29",
+    "mockery/mockery": "^1.6",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan-strict-rules": "^2",
+    "phpstan/phpstan-mockery": "^2",
+    "phpstan/phpstan-phpunit": "^2",
+    "squizlabs/php_codesniffer": "^4",
+    "symfony/var-dumper": "^7|^8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Teamradhq\\DiceRoll\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Teamradhq\\DiceRoll\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true,
+      "php-http/discovery": true
+    }
+  },
+  "scripts": {
+    "cbf": "vendor/bin/phpcbf --standard=phpcs.xml --extensions=php --ignore=vendor",
+    "cs": "vendor/bin/phpcs --standard=phpcs.xml --extensions=php --ignore=vendor",
+    "pint": "vendor/bin/pint --config pint.json",
+    "rector": "vendor/bin/rector process --config rector.php",
+    "stan": "vendor/bin/phpstan analyse rector.php src tests",
+    "test": "php -dxdebug.mode=coverage -dpcov.enabled=0 vendor/bin/phpunit",
+    "all": [
+      "@rector",
+      "@cs",
+      "@cbf",
+      "@pint",
+      "@stan",
+      "@test"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+parameters:
+  level: max
+
+  paths:
+    - src
+    - tests
+
+  treatPhpDocTypesAsCertain: false
+  checkMissingCallableSignature: true
+  checkUninitializedProperties: true
+  checkDynamicProperties: true
+  checkTooWideReturnTypesInProtectedAndPublicMethods: true
+  checkImplicitMixed: true
+  checkBenevolentUnionTypes: true
+  reportWrongPhpDocTypeInVarTag: true
+  reportMaybesInMethodSignatures: true
+  reportStaticMethodSignatures: true
+  reportAlwaysTrueInLastCondition: true
+  reportUnmatchedIgnoredErrors: false
+
+  exceptions:
+    check:
+      missingCheckedExceptionInThrows: true
+      tooWideThrowType: true
+
+    uncheckedExceptionClasses:
+      - TypeError
+      - RuntimeException
+      - InvalidArgumentException
+      - LogicException
+      - PHPUnit\Framework\ExpectationFailedException
+      - PHPUnit\Framework\AssertionFailedError
