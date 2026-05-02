@@ -18,6 +18,14 @@ use Teamradhq\DiceRoll\Tests\Fixture\TestRandomiser;
 #[CoversClass(Dice::class)]
 final class DiceTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        Dice::setUp(null);
+        TestRandomiser::reset();
+
+        parent::tearDown();
+    }
+
     public static function invalidResultProvider(): Generator
     {
         yield 'negative' => [-2];
@@ -51,14 +59,16 @@ final class DiceTest extends TestCase
     public function test_roll_is_always_in_range(): void
     {
         $results = [];
+        $dice = Dice::make();
 
         for ($i = 0; $i < 100; $i++) {
-            $results[] = Dice::make()->roll()->result;
+            $results[] = $dice->roll()->result();
         }
 
         $unique = array_unique($results);
         sort($unique);
 
+        self::assertSame(6, $dice->sides());
         self::assertCount(100, $results);
         self::assertSame([1, 2, 3, 4, 5, 6], $unique);
     }
@@ -68,12 +78,35 @@ final class DiceTest extends TestCase
      */
     public function test_advantage_is_rolled(): void
     {
+        Dice::setUp(TestRandomiser::given(1, 2));
 
-        Dice::setRandomiser(TestRandomiser::given(1, 2));
-
-        self::assertSame(2, Dice::make()->advantage()->result);
+        self::assertSame(2, Dice::make()->advantage()->result());
         TestRandomiser::assertWasCalled(2);
+    }
 
-        Dice::setRandomiser(null);
+    /**
+     * @throws RollException
+     */
+    public function test_disadvantage_is_rolled(): void
+    {
+        Dice::setUp(TestRandomiser::given(1, 2));
+
+        self::assertSame(1, Dice::make()->disadvantage()->result());
+        TestRandomiser::assertWasCalled(2);
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function test_rolled_dice_is_always_unique(): void
+    {
+        $dice = Dice::make();
+        $rolled = $dice->roll();
+
+        self::assertNotSame($rolled, $dice);
+        self::assertFalse($dice->isRolled());
+        self::assertTrue($rolled->isRolled());
+        self::assertSame(-1, $dice->result());
+        self::assertNotSame(-1, $rolled->result());
     }
 }

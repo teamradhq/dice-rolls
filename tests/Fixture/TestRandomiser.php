@@ -11,6 +11,8 @@ final class TestRandomiser implements Randomiser
 {
     private static int $called = 0;
 
+    private static int $default = 1;
+
     /** @var int[] */
     private static array $values = [];
 
@@ -36,6 +38,6 @@ final class TestRandomiser implements Randomiser
     {
         self::$called++;
 
-        return array_shift(self::$values) ?? 1;
+        return array_shift(self::$values) ?? self::$default;
     }
 }

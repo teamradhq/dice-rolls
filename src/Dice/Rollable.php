@@ -7,6 +7,11 @@ namespace Teamradhq\DiceRoll\Dice;
 interface Rollable
 {
     /**
+     * The number of sides on the dice.
+     */
+    public function sides(): int;
+
+    /**
      * Roll the dice.
      */
     public function roll(): self;
@@ -24,5 +29,10 @@ interface Rollable
     /**
      * This dice has been rolled.
      */
-    public function rolled(): bool;
+    public function isRolled(): bool;
+
+    /**
+     * Get the result of a rolled dice.
+     */
+    public function result(): int;
 }
