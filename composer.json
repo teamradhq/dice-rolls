@@ -3,7 +3,7 @@
   "license": "MIT",
   "type": "library",
   "require": {
-    "php": "^8.4",
+    "php": "^8.5",
     "laravel/framework": "^13",
     "laravel/tinker": "^3"
   },
@@ -42,7 +42,7 @@
     "pint": "vendor/bin/pint --config pint.json",
     "rector": "vendor/bin/rector process --config rector.php",
     "stan": "vendor/bin/phpstan analyse rector.php src tests",
-    "test": "php -dxdebug.mode=coverage -dpcov.enabled=0 vendor/bin/phpunit",
+    "test": "php -dxdebug.mode=coverage -dpcov.enabled=0 vendor/bin/phpunit --display-all-issues",
     "all": [
       "@rector",
       "@cs",

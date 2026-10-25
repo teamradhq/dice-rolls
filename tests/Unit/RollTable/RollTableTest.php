@@ -4,110 +4,72 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
 
-use Generator;
 use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Teamradhq\DiceRoll\Dice\Rollable;
+use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Dice\RollException;
+use Teamradhq\DiceRoll\Enums\PrimitiveType;
 use Teamradhq\DiceRoll\RollTable\RollTable;
-use Teamradhq\DiceRoll\RollTable\TableException;
-use Teamradhq\DiceRoll\Tests\Fixture\TestItem;
+use Throwable;
 
 #[CoversClass(RollTable::class)]
 final class RollTableTest extends TestCase
 {
-    public static function invalidResultProvider(): Generator
+    /** @var MockInterface&Rollable */
+    public MockInterface $dice;
+
+    /** @var ?RollTable<mixed> */
+    public ?RollTable $rollTable = null;
+
+    /**
+     * @throws Throwable
+     */
+    protected function setUp(): void
     {
-        yield 'negative' => [-2, "Index -2 is out of bounds."];
+        parent::setUp();
+        $this->dice = Mockery::mock(Rollable::class);
+    }
 
-        yield 'zero' => [0, "Index 0 is out of bounds."];
-
-        yield 'positive' => [3, "Index 3 is out of bounds."];
+    protected function tearDown(): void
+    {
+        $this->rollTable = null;
+        parent::tearDown();
     }
 
     /**
-     * @throws TableException
+     * @param class-string|PrimitiveType $type
+     * @param array<int, mixed> $items
+     *
+     * @return RollTable<mixed>
+     *
      * @throws RollException
      */
-    public function test_invalid_roll_table_is_not_created(): void
-    {
-        $this->expectExceptionMessage('Class invalid does not exist.');
-        $this->expectException(TableException::class);
+    public function rollTable(
+        int $size = 3,
+        string|PrimitiveType $type = PrimitiveType::Int,
+        array $items = [1, 2, 3]
+    ): RollTable {
+        $this->rollTable ??= new class ($size, $type, $this->dice) extends RollTable {};
 
-        new RollTable(6, 'invalid');
-    }
+        foreach ($items as $item) {
+            $this->rollTable->add($item);
+        }
 
-    /**
-     * @throws RollException
-     * @throws TableException
-     */
-    public function test_valid_roll_table_is_created(): void
-    {
-        /** @var RollTable<TestItem> $rollTable */
-        $rollTable = new RollTable(2, TestItem::class);
-        $rollTable->add(new TestItem('a'), 1);
-        $rollTable->add(new TestItem('b'), 2);
-
-        self::assertContains($rollTable->roll()->name, ['a', 'b']);
-    }
-
-    /**
-     * @throws RollException
-     * @throws TableException
-     */
-    #[DataProvider('invalidResultProvider')]
-    public function test_invalid_table_index_is_forbidden(int $result, string $message): void
-    {
-        $mock = Mockery::mock(Rollable::class);
-        $mock->allows('roll')->andReturn($mock);
-        $mock->allows('result')->andReturn($result);
-
-        /** @var RollTable<TestItem> $rollTable */
-        $rollTable = new RollTable(2, TestItem::class, $mock);
-        $rollTable->add(new TestItem('a'), 1);
-        $rollTable->add(new TestItem('b'), 2);
-
-        $this->expectException(TableException::class);
-        $this->expectExceptionMessage($message);
-
-        $rollTable->roll();
+        return $this->rollTable;
     }
 
     /**
      * @throws RollException
-     * @throws TableException
      */
-    public function test_cannot_roll_if_table_is_not_full(): void
+    public function test_rolling(): void
     {
-        /** @var RollTable<TestItem> $rollTable */
-        $rollTable = new RollTable(2, TestItem::class);
-        $rollTable->add(new TestItem('a'), 1);
+        $this->dice->expects('roll')->andReturn($this->dice);
+        $this->dice->expects('result')->andReturn(3);
 
-        $this->expectException(TableException::class);
-        $this->expectExceptionMessage('Cannot roll when table is not filled.');
+        $rollTable = $this->rollTable();
 
-        $rollTable->roll();
-    }
-
-    /**
-     * @throws RollException
-     * @throws TableException
-     */
-    public function test_item_can_span_multiple_rows(): void
-    {
-        $mock = Mockery::mock(Rollable::class);
-        $mock->allows('roll')->andReturn($mock);
-        $mock->allows('result')->andReturn(1, 2, 3);
-
-        /** @var RollTable<TestItem> $rollTable */
-        $rollTable = new RollTable(3, TestItem::class, $mock);
-        $rollTable->add(new TestItem('a'), 1);
-        $rollTable->add(new TestItem('b'), 2, 3);
-
-        self::assertSame('a', $rollTable->roll()->name);
-        self::assertSame('b', $rollTable->roll()->name);
-        self::assertSame('b', $rollTable->roll()->name);
+        self::assertSame(3, $rollTable->roll());
     }
 }

@@ -4,98 +4,189 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\RollTable;
 
-use stdClass;
+use Teamradhq\DiceRoll\Contracts\Rollable;
+use Teamradhq\DiceRoll\Contracts\Table;
 use Teamradhq\DiceRoll\Dice\Dice;
-use Teamradhq\DiceRoll\Dice\Rollable;
 use Teamradhq\DiceRoll\Dice\RollException;
+use Teamradhq\DiceRoll\Enums\PrimitiveType;
 
 /**
- * @template TItem of object
+ * @template TableItem
+ *
+ * @implements Table<TableItem>
  */
-final class RollTable
+abstract class RollTable implements Table
 {
-    /** @var class-string<TItem> */
-    public readonly string $itemClass;
+    /** @var TableItem[] */
+    protected array $items = [];
 
-    /** @var array<int, true> */
-    private array $availableKeys;
-
-    /** @var array<int, TItem> */
-    private array $items = [];
-
-    private readonly Rollable $rollable;
+    protected Rollable $dice;
 
     /**
+     * @param class-string|PrimitiveType $type
+     *
      * @throws RollException
-     * @throws TableException
      */
     public function __construct(
-        public readonly int $size,
-        string $itemClass,
-        ?Rollable $rollable = null
+        protected int $size,
+        protected string|PrimitiveType $type,
+        ?Rollable $rollable = null,
     ) {
-        if (!class_exists($itemClass)) {
-            throw new TableException(sprintf('Class %s does not exist.', $itemClass));
+        if ($size < 2) {
+            throw new RollException(sprintf(
+                'Table size should be greater than 2: %d given.',
+                $size
+            ));
         }
 
-        /** @var class-string<TItem> $itemClass */
-        $this->itemClass = $itemClass;
-        $this->availableKeys = array_fill(1, $size, true);
-        $this->rollable = $rollable ?? Dice::make($this->size);
+        $this->dice = $rollable ?? Dice::make($size);
     }
 
     /**
-     * @param TItem $item
-     *
-     * @throws TableException
+     * @throws RollException
      */
-    public function add(object $item, int $min, ?int $max = null): void
+    public function roll(): mixed
     {
-        if (
-            is_subclass_of($item, $this->itemClass)
-            || ($this->itemClass !== stdClass::class && $item instanceof stdClass)
-        ) {
-            throw new TableException(
-                sprintf('Invalid type: %s. All items must be %s instances', $item::class, $this->itemClass)
+        return $this->rollItem();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function rollAdvantage(): mixed
+    {
+        return $this->rollItem(true);
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function rollDisadvantage(): mixed
+    {
+        return $this->rollItem(isDisadvantage: true);
+    }
+
+    public function list(): array
+    {
+        return $this->items;
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function add(mixed $item, int $slots = 1): void
+    {
+        if ($slots < 1) {
+            throw new RollException(sprintf(
+                'Item slots must be 1 or more. %s given.',
+                $slots
+            ));
+        }
+
+        while (--$slots >= 0) {
+            $this->addItem($item);
+        }
+    }
+
+    public function size(): int
+    {
+        return $this->size;
+    }
+
+    public function type(): string
+    {
+        if (is_string($type = $this->type)) {
+            /** @var class-string $type */
+            return $type;
+        }
+
+        return $this->type->value;
+    }
+
+    /**
+     * The table is full when the number of items matches its size.
+     */
+    public function isFull(): bool
+    {
+        return count($this->items) >= $this->size();
+    }
+
+    /**
+     * @throws RollException
+     */
+    private function addItem(mixed $item): void
+    {
+        if (!$this->isValid($item)) {
+            throw new RollException(sprintf(
+                'Provided item must be of type %s. %s given.',
+                $this->type(),
+                gettype($item)
+            ));
+        }
+
+        if ($this->isFull()) {
+            throw new RollException('Cannot add items to a full table.');
+        }
+
+        /** @var TableItem $item */
+        $this->items[count($this->items) + 1] = $item;
+    }
+
+    /**
+     * @phpstan-assert-if-true TableItem $item
+     */
+    private function isValid(mixed $item): bool
+    {
+        if (is_string($this->type)) {
+            return $item instanceof $this->type;
+        }
+
+        return match ($this->type) {
+            PrimitiveType::Bool => is_bool($item),
+            PrimitiveType::Float => is_float($item),
+            PrimitiveType::Int => is_int($item),
+            PrimitiveType::Number => is_float($item) || is_int($item),
+            PrimitiveType::String => is_string($item),
+        };
+    }
+
+    /**
+     * @return TableItem
+     * @throws RollException
+     */
+    private function rollItem(bool $isAdvantage = false, bool $isDisadvantage = false): mixed
+    {
+        if (!$this->isFull()) {
+            throw new RollException(sprintf(
+                'Cannot roll when table is not full. '
+                . 'Table size is %d, but only %d slots are filled.',
+                $this->size(),
+                count($this->items),
+            ));
+        }
+
+        if ($isAdvantage && $isDisadvantage) {
+            throw new RollException(
+                'Cannot roll with advantage and disadvantage at the same time.'
             );
         }
 
-        foreach (range($min, $max ?? $min) as $index) {
-            if (!isset($this->availableKeys[$index])) {
-                throw new TableException(sprintf('Index %d is unavailable', $index));
-            }
+        $result = match (true) {
+            $isAdvantage => $this->dice->advantage(),
+            $isDisadvantage => $this->dice->disadvantage(),
+            default => $this->dice->roll(),
+        };
 
-            unset($this->availableKeys[$index]);
-            $this->items[$index] = $item;
-        }
-    }
+        $item = $this->items[$result->result()] ?? null;
 
-    /**
-     * @return TItem
-     *
-     * @throws RollException
-     * @throws TableException
-     */
-    public function roll(): object
-    {
-        if (!$this->isTableFull()) {
-            throw new TableException('Cannot roll when table is not filled.');
+        if (is_null($item)) {
+            throw new RollException(sprintf(
+                'Item not found at slot %d',
+                $result->result()
+            ));
         }
 
-        if (!$this->isIndexInRange($index = $this->rollable->roll()->result())) {
-            throw new TableException(sprintf('Index %d is out of bounds.', $index));
-        }
-
-        return $this->items[$index];
-    }
-
-    private function isIndexInRange(int $index): bool
-    {
-        return $index >= 1 && $index <= $this->size;
-    }
-
-    private function isTableFull(): bool
-    {
-        return $this->availableKeys === [];
+        /** @var TableItem $item */
+        return $item;
     }
 }

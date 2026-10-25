@@ -7,6 +7,7 @@ namespace Teamradhq\DiceRoll\Tests\Unit\Dice;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\TestCase;
 use Teamradhq\DiceRoll\Dice\Compare;
 use Teamradhq\DiceRoll\Dice\Dice;
@@ -96,5 +97,11 @@ final class CompareTest extends TestCase
         self::assertSame($expected, $test(new Compare, $diceA, $diceB));
 
         TestRandomiser::reset();
+    }
+
+    #[DoesNotPerformAssertions]
+    public function test_guard_prevents_comparison(): void
+    {
+        self::markTestIncomplete('Need to write case provider for expected exceptions.');
     }
 }

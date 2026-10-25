@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 use Rector\CodeQuality\Rector\ClassMethod\LocallyCalledStaticMethodToNonStaticRector;
-use Rector\CodingStyle\Rector\Encapsed\EncapsedStringsToSprintfRector;
 use Rector\Config\RectorConfig;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
@@ -11,12 +10,13 @@ use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
 return RectorConfig::configure()
+    ->withComposerBased(phpunit: true)
+    ->withPhpSets(php84: true)
     ->withPaths([
         __FILE__,
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
-    ->withPhpSets(php82: true)
     ->withSkip([
         LocallyCalledStaticMethodToNonStaticRector::class,
         PreferPHPUnitThisCallRector::class,
@@ -32,22 +32,21 @@ return RectorConfig::configure()
         earlyReturn: true,
     )
     ->withSets([
-        LevelSetList::UP_TO_PHP_82,
+        LevelSetList::UP_TO_PHP_84,
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::EARLY_RETURN,
         SetList::TYPE_DECLARATION,
         SetList::PRIVATIZATION,
         SetList::INSTANCEOF,
-        PHPUnitSetList::PHPUNIT_100,
+        SetList::CODING_STYLE,
+        PHPUnitSetList::PHPUNIT_MOCK_TO_STUB,
+        PHPUnitSetList::PHPUNIT_NARROW_ASSERTS,
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
     ])
     ->withRules([
         DeclareStrictTypesRector::class,
-    ])
-    ->withConfiguredRule(EncapsedStringsToSprintfRector::class, [
-        EncapsedStringsToSprintfRector::ALWAYS => true,
     ])
     ->withImportNames(removeUnusedImports: true)
     ->withParallel();

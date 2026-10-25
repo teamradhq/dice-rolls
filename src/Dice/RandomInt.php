@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Teamradhq\DiceRoll\Dice;
 
 use Random\RandomException;
+use Teamradhq\DiceRoll\Contracts\Randomiser;
 
 final readonly class RandomInt implements Randomiser
 {

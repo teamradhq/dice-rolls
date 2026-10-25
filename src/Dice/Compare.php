@@ -4,68 +4,83 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Dice;
 
-use BadMethodCallException;
 use InvalidArgumentException;
+use Teamradhq\DiceRoll\Contracts\Comparison;
+use Teamradhq\DiceRoll\Contracts\Rollable;
 
-/**
- * @method bool gt(Rollable $a, Rollable $b) A is greater than B.
- * @method bool gte(Rollable $a, Rollable $b) A is greater than or equal to B.
- * @method bool lt(Rollable $a, Rollable $b) A is less than B.
- * @method bool lte(Rollable $a, Rollable $b) A is less than or equal to B.
- * @method bool eq(Rollable $a, Rollable $b) A is equal to B.
- * @method bool neq(Rollable $a, Rollable $b) A is not equal to B.
- */
-final class Compare
+final class Compare implements Comparison
 {
     /**
-     * @param array{0: Rollable, 1: Rollable} $arguments
-     *
      * @throws RollException
      */
-    public function __call(string $name, array $arguments): bool
+    public static function guard(mixed $a, mixed $b): void
     {
-        [$a, $b] = self::guard($arguments);
-
-        return match ($name) {
-            'gt' => $a > $b,
-            'gte' => $a >= $b,
-            'lt' => $a < $b,
-            'lte' => $a <= $b,
-            'eq' => $a === $b,
-            'neq' => $a !== $b,
-            default => throw new BadMethodCallException(sprintf('Unknown comparison method: %s', $name)),
-        };
-    }
-
-    /**
-     * @param array<int, mixed> $arguments
-     * @return array{0: int, 1: int}
-     *
-     * @throws RollException
-     */
-    private static function guard(array $arguments): array
-    {
-        if (count($arguments) !== 2) {
-            throw new InvalidArgumentException('The method must be called with exactly two arguments.');
-        }
-
-        foreach ($arguments as $argument) {
+        foreach ([$a, $b] as $argument) {
             if ($argument instanceof Rollable === false) {
-                throw new InvalidArgumentException('The argument must be an instance of Rollable.');
+                throw new InvalidArgumentException('All arguments must be an instance of Rollable.');
             }
 
             if (!$argument->isRolled()) {
-                throw new RollException('Both dice must be rolled before comparison.');
+                throw new RollException('Both dice must be rolled for comparison.');
             }
         }
+    }
 
-        /** @var Rollable[] $arguments */
-        [$a, $b] = $arguments;
+    /**
+     * @throws RollException
+     */
+    public function gt(Rollable $a, Rollable $b): bool
+    {
+        self::guard($a, $b);
 
-        if ($a->isRolled() && $b->isRolled()) {
-            return [$a->result(), $b->result()];
-        }
+        return $a->result() > $b->result();
+    }
 
-        throw new RollException('Both dice must be rolled before comparison.');
+    /**
+     * @throws RollException
+     */
+    public function gte(Rollable $a, Rollable $b): bool
+    {
+        self::guard($a, $b);
+
+        return $a->result() >= $b->result();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function lt(Rollable $a, Rollable $b): bool
+    {
+        self::guard($a, $b);
+
+        return $a->result() < $b->result();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function lte(Rollable $a, Rollable $b): bool
+    {
+        self::guard($a, $b);
+
+        return $a->result() <= $b->result();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function eq(Rollable $a, Rollable $b): bool
+    {
+        self::guard($a, $b);
+
+        return $a->result() === $b->result();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function neq(Rollable $a, Rollable $b): bool
+    {
+        return !$this->eq($a, $b);
     }
 }

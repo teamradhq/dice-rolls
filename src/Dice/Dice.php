@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Teamradhq\DiceRoll\Dice;
 
 use Random\RandomException;
+use Teamradhq\DiceRoll\Contracts\Randomiser;
+use Teamradhq\DiceRoll\Contracts\Rollable;
 
 final class Dice implements Rollable
 {
