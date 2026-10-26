@@ -4,72 +4,87 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
 
-use Mockery;
-use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProviderExternal;
+use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
-use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Dice\RollException;
 use Teamradhq\DiceRoll\Enums\PrimitiveType;
 use Teamradhq\DiceRoll\RollTable\RollTable;
-use Throwable;
+use Teamradhq\DiceRoll\Tests\Fixture\TestSetupException;
+use Teamradhq\DiceRoll\Tests\Unit\RollTable\RollTableTestProvider as Provider;
 
 #[CoversClass(RollTable::class)]
 final class RollTableTest extends TestCase
 {
-    /** @var MockInterface&Rollable */
-    public MockInterface $dice;
-
-    /** @var ?RollTable<mixed> */
-    public ?RollTable $rollTable = null;
-
-    /**
-     * @throws Throwable
-     */
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dice = Mockery::mock(Rollable::class);
+        Provider::setUp();
     }
 
     protected function tearDown(): void
     {
-        $this->rollTable = null;
+        Provider::tearDown();
         parent::tearDown();
     }
 
     /**
-     * @param class-string|PrimitiveType $type
      * @param array<int, mixed> $items
      *
-     * @return RollTable<mixed>
-     *
      * @throws RollException
+     * @throws TestSetupException
      */
-    public function rollTable(
-        int $size = 3,
-        string|PrimitiveType $type = PrimitiveType::Int,
-        array $items = [1, 2, 3]
-    ): RollTable {
-        $this->rollTable ??= new class ($size, $type, $this->dice) extends RollTable {};
+    #[TestDox('table should roll for $_dataName item.')]
+    #[DataProviderExternal(Provider::class, 'primitives')]
+    public function test_primitive_rolls(PrimitiveType $primitiveType, array $items): void
+    {
+        Provider::dice()->expects('result')->andReturn(1, 2, 3);
 
-        foreach ($items as $item) {
-            $this->rollTable->add($item);
-        }
+        [$expectedRoll, $expectedAdvantage, $expectedDisadvantage] = $items;
 
-        return $this->rollTable;
+        $rollTable = Provider::rollTable(3, $primitiveType, $items);
+
+        self::assertSame($expectedRoll, $rollTable->roll());
+        self::assertSame($expectedAdvantage, $rollTable->advantage());
+        self::assertSame($expectedDisadvantage, $rollTable->disadvantage());
     }
 
     /**
+     * @param array<int, mixed> $args
+     * @param array<string, mixed> $expected
+     *
      * @throws RollException
+     * @throws TestSetupException
      */
-    public function test_rolling(): void
+    #[TestDox('Created table $_dataName.')]
+    #[DataProviderExternal(Provider::class, 'created')]
+    public function test_a_table_can_be_created(array $args, array $expected): void
     {
-        $this->dice->expects('roll')->andReturn($this->dice);
-        $this->dice->expects('result')->andReturn(3);
+        /** @phpstan-ignore argument.type (Incorrect args will cause test failure.) */
+        $rollTable = Provider::rollTable(...$args);
 
-        $rollTable = $this->rollTable();
+        self::assertSame($expected['size'], $rollTable->size());
+        self::assertSame($expected['type'], $rollTable->type());
+        self::assertSame($expected['list'], $rollTable->list());
+        self::assertSame($expected['isFull'], $rollTable->isFull());
+    }
 
-        self::assertSame(3, $rollTable->roll());
+    /**
+     * @param callable(RollTable<mixed>):void $shouldThrow
+     *
+     * @throws RollException
+     * @throws TestSetupException
+     */
+    #[TestDox('Table cannot $_dataName')]
+    #[DataProviderExternal(Provider::class, 'errors')]
+    public function test_table_handles_errors(callable $shouldThrow, string $expected): void
+    {
+        $rollTable = Provider::rollTable(4);
+
+        $this->expectException(RollException::class);
+        $this->expectExceptionMessageIsOrContains($expected);
+
+        $shouldThrow($rollTable);
     }
 }

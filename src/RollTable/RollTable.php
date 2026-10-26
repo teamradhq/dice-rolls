@@ -53,7 +53,7 @@ abstract class RollTable implements Table
     /**
      * @throws RollException
      */
-    public function rollAdvantage(): mixed
+    public function advantage(): mixed
     {
         return $this->rollItem(true);
     }
@@ -61,14 +61,14 @@ abstract class RollTable implements Table
     /**
      * @throws RollException
      */
-    public function rollDisadvantage(): mixed
+    public function disadvantage(): mixed
     {
-        return $this->rollItem(isDisadvantage: true);
+        return $this->rollItem(false);
     }
 
     public function list(): array
     {
-        return $this->items;
+        return array_values(array_unique($this->items));
     }
 
     /**
@@ -154,34 +154,28 @@ abstract class RollTable implements Table
      * @return TableItem
      * @throws RollException
      */
-    private function rollItem(bool $isAdvantage = false, bool $isDisadvantage = false): mixed
+    private function rollItem(?bool $isAdvantage = null): mixed
     {
         if (!$this->isFull()) {
             throw new RollException(sprintf(
                 'Cannot roll when table is not full. '
-                . 'Table size is %d, but only %d slots are filled.',
+                . 'Table size is %d, but only %d slots filled.',
                 $this->size(),
                 count($this->items),
             ));
         }
 
-        if ($isAdvantage && $isDisadvantage) {
-            throw new RollException(
-                'Cannot roll with advantage and disadvantage at the same time.'
-            );
-        }
-
-        $result = match (true) {
-            $isAdvantage => $this->dice->advantage(),
-            $isDisadvantage => $this->dice->disadvantage(),
-            default => $this->dice->roll(),
+        $result = match ($isAdvantage) {
+            true => $this->dice->advantage(),
+            false => $this->dice->disadvantage(),
+            null => $this->dice->roll(),
         };
 
         $item = $this->items[$result->result()] ?? null;
 
         if (is_null($item)) {
             throw new RollException(sprintf(
-                'Item not found at slot %d',
+                'Item not found at slot %d.',
                 $result->result()
             ));
         }

@@ -21,14 +21,14 @@ interface Table
      *
      * @return TableItem
      */
-    public function rollAdvantage(): mixed;
+    public function advantage(): mixed;
 
     /**
      * Roll to get a random item from the table with disadvantage.
      *
      * @return TableItem
      */
-    public function rollDisadvantage(): mixed;
+    public function disadvantage(): mixed;
 
     /**
      * Get a list of all items in the table.

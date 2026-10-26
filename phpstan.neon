@@ -4,7 +4,6 @@ parameters:
   paths:
     - src
     - tests
-
   treatPhpDocTypesAsCertain: false
   checkMissingCallableSignature: true
   checkUninitializedProperties: true
@@ -16,7 +15,8 @@ parameters:
   reportMaybesInMethodSignatures: true
   reportStaticMethodSignatures: true
   reportAlwaysTrueInLastCondition: true
-  reportUnmatchedIgnoredErrors: false
+  reportUnmatchedIgnoredErrors: true
+  reportIgnoresWithoutComments: true
 
   exceptions:
     check:
