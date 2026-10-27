@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist --no-interaction
+
+      - name: Check coding standards
+        run: composer cs
+
+      - name: Check formatting
+        run: composer run-script pint -- --test
+
+      - name: Check Rector rules
+        run: composer run-script rector -- --dry-run
+
+      - name: Run static analysis
+        run: composer stan
+
+      - name: Run tests
+        run: composer test
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage
+          path: coverage
+          if-no-files-found: warn
