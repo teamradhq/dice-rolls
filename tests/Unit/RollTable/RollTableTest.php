@@ -92,7 +92,7 @@ final class RollTableTest extends TestCase
      * @throws RollException
      * @throws TestSetupException
      */
-    #[TestDox('Table cannot $_dataName')]
+    #[TestDox('Table cannot $_dataName.')]
     #[DataProviderExternal(Provider::class, 'errors')]
     public function test_table_handles_errors(callable $shouldThrow, string $expected): void
     {

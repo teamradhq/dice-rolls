@@ -45,6 +45,13 @@ interface Table
     public function add(mixed $item, int $rows = 1): void;
 
     /**
+     * Get the item for the provided table row.
+     *
+     * @return TableItem
+     */
+    public function get(int $row): mixed;
+
+    /**
      * Get the total rows of the table.
      */
     public function rows(): int;

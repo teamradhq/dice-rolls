@@ -162,11 +162,11 @@ final class RollTableTestProvider
      */
     public static function errors(): Generator
     {
-        yield 'add item with non-positive slots' => [
+        yield 'add item with non-positive rows' => [
             function (RollTable $rollTable): void {
                 $rollTable->add(1, 0);
             },
-            'Item slots must be 1 or more. 0 given.',
+            'Item rows must be 1 or more. 0 given.',
         ];
 
         yield 'add invalid item' => [
@@ -187,7 +187,21 @@ final class RollTableTestProvider
             function (RollTable $rollTable): void {
                 $rollTable->roll();
             },
-            'Cannot roll when table is not full. Table size is 4, but only 3 slots filled.',
+            'Cannot roll when table is not full. Table has 4 rows, but only 3 filled.',
+        ];
+
+        yield 'cannot get item when row is not found' => [
+            function (RollTable $rollTable): void {
+                $rollTable->get(1000);
+            },
+            'Item not found at row 1000.',
+        ];
+
+        yield 'cannot get item when row is less than one' => [
+            function (RollTable $rollTable): void {
+                $rollTable->get(0);
+            },
+            'Item not found at row 0.',
         ];
 
         yield 'finish roll when item is not found' => [
@@ -196,14 +210,14 @@ final class RollTableTestProvider
                 $rollTable->add(1);
                 $rollTable->roll();
             },
-            'Item not found at slot 1000.',
+            'Item not found at row 1000.',
         ];
 
         yield 'create a size lower than 2' => [
             function (RollTable $rollTable): void {
                 new class (1, PrimitiveType::Int) extends RollTable {};
             },
-            'Table size should be greater than 2: 1 given.',
+            'Table rows should be greater than 2: 1 given.',
         ];
     }
 }

@@ -35,7 +35,7 @@ abstract class RollTable implements Table
     ) {
         if ($size < 2) {
             throw new RollException(sprintf(
-                'Table size should be greater than 2: %d given.',
+                'Table rows should be greater than 2: %d given.',
                 $size
             ));
         }
@@ -76,11 +76,21 @@ abstract class RollTable implements Table
     /**
      * @throws RollException
      */
+    public function get(int $row): mixed
+    {
+        $this->guardRow($row);
+
+        return $this->items[$row];
+    }
+
+    /**
+     * @throws RollException
+     */
     public function add(mixed $item, int $rows = 1): void
     {
         if ($rows < 1) {
             throw new RollException(sprintf(
-                'Item slots must be 1 or more. %s given.',
+                'Item rows must be 1 or more. %s given.',
                 $rows
             ));
         }
@@ -168,7 +178,7 @@ abstract class RollTable implements Table
         if (!$this->isFull()) {
             throw new RollException(sprintf(
                 'Cannot roll when table is not full. '
-                . 'Table size is %d, but only %d slots filled.',
+                . 'Table has %d rows, but only %d filled.',
                 $this->rows(),
                 count($this->items),
             ));
@@ -184,25 +194,17 @@ abstract class RollTable implements Table
     }
 
     /**
-     * Get the table item located at the slot corresponding to the provided index.
+     * Get the table item from the provided table row.
      *
      * @return TableItem
      *
      * @throws RollException When an item cannot be found.
      */
-    private function getItem(int $index): mixed
+    private function getItem(int $row): mixed
     {
-        $item = $this->items[$index] ?? null;
+        $this->guardRow($row);
 
-        if ($item === null) {
-            throw new RollException(sprintf(
-                'Item not found at slot %d.',
-                $index
-            ));
-        }
-
-        /** @var TableItem $item */
-        return $item;
+        return $this->items[$row];
     }
 
     /**
@@ -215,5 +217,18 @@ abstract class RollTable implements Table
         }
 
         return $this->type->matches($item);
+    }
+
+    /**
+     * @throws RollException
+     */
+    private function guardRow(int $row): void
+    {
+        if (!array_key_exists($row, $this->items)) {
+            throw new RollException(sprintf(
+                'Item not found at row %d.',
+                $row
+            ));
+        }
     }
 }
