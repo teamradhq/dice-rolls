@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
+use Random\RandomException;
 use ReflectionClass;
 use ReflectionException;
 use Teamradhq\DiceRoll\Dice\Dice;
@@ -33,6 +34,13 @@ final class DiceTest extends TestCase
         yield 'zero' => [0];
 
         yield 'exceeds max' => [7];
+    }
+
+    public static function timesProvider(): Generator
+    {
+        yield 'first' => [[2, 1]];
+
+        yield 'second' => [[1, 2]];
     }
 
     /**
@@ -74,22 +82,30 @@ final class DiceTest extends TestCase
     }
 
     /**
+     * @param int[] $values
+     *
      * @throws RollException
      */
-    public function test_advantage_is_rolled(): void
+    #[TestDox('Advantage gives the $_dataName item with the higher value.')]
+    #[DataProvider('timesProvider')]
+    public function test_advantage_is_rolled(array $values): void
     {
-        Dice::setUp(TestRandomiser::given(1, 2));
+        Dice::setUp(TestRandomiser::given(...$values));
 
         self::assertSame(2, Dice::make()->advantage()->result());
         TestRandomiser::assertWasCalled(2);
     }
 
     /**
+     * @param int[] $values
+     *
      * @throws RollException
      */
-    public function test_disadvantage_is_rolled(): void
+    #[TestDox('Disadvantage does not give the $_dataName item with the higher value.')]
+    #[DataProvider('timesProvider')]
+    public function test_disadvantage_is_rolled(array $values): void
     {
-        Dice::setUp(TestRandomiser::given(1, 2));
+        Dice::setUp(TestRandomiser::given(...$values));
 
         self::assertSame(1, Dice::make()->disadvantage()->result());
         TestRandomiser::assertWasCalled(2);
@@ -108,5 +124,31 @@ final class DiceTest extends TestCase
         self::assertTrue($rolled->isRolled());
         self::assertSame(-1, $dice->result());
         self::assertNotSame(-1, $rolled->result());
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function test_random_error_is_reported(): void
+    {
+
+        Dice::setUp(TestRandomiser::throws(new RandomException('Test Error', 123)));
+
+        $this->expectExceptionMessageIsOrContains('Could not roll the dice.');
+        $this->expectExceptionCode(123);
+        $this->expectException(RollException::class);
+
+        Dice::make()->roll();
+    }
+
+    /**
+     * @throws RollException
+     */
+    public function test_multiple_rolls_is_at_least_one(): void
+    {
+        $this->expectExceptionMessageIsOrContains('Dice must be rolled at least once.');
+        $this->expectException(RollException::class);
+
+        Dice::make()->times(0);
     }
 }

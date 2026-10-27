@@ -6,6 +6,7 @@ namespace Teamradhq\DiceRoll\Tests\Fixture;
 
 use PHPUnit\Framework\Assert;
 use Teamradhq\DiceRoll\Contracts\Randomiser;
+use Throwable;
 
 final class TestRandomiser implements Randomiser
 {
@@ -15,15 +16,28 @@ final class TestRandomiser implements Randomiser
     /** @var int A default value of 1 will be given when values are exhausted. */
     private static int $default = 1;
 
-    /** @var int[] A list of values that will be given in order. */
+    /** @var (int|Throwable)[] A list of values that will be given in order. */
     private static array $values = [];
 
     /**
-     * Provide values that will be given in order.
+     * Provide values that will be given in order, including all previously added values.
      */
     public static function given(int ...$values): self
     {
-        self::$values = $values;
+        foreach ($values as $value) {
+            self::$values[] = $value;
+        }
+
+        return new self;
+    }
+
+    /**
+     * Provide an exception to throw when a random value is requested. This is added to the value
+     * list, so you can add n-1 items followed by an exception to throw on the nth call.
+     */
+    public static function throws(Throwable $throwable): self
+    {
+        self::$values[] = $throwable;
 
         return new self;
     }
@@ -34,6 +48,7 @@ final class TestRandomiser implements Randomiser
     public static function reset(): void
     {
         self::$called = 0;
+        self::$default = 1;
         self::$values = [];
     }
 
@@ -48,12 +63,21 @@ final class TestRandomiser implements Randomiser
     /**
      * {@inheritDoc}
      *
-     * The call count will be incremented and the next value is provided, or the default once values are exhausted.
+     * The call count is incremented and the next or default value is provided. When the next
+     * value is an exception this will be thrown.
+     *
+     * @throws Throwable
      */
     public function value(int $min = 1, int $max = 1): int
     {
         self::$called++;
 
-        return array_shift(self::$values) ?? self::$default;
+        $next = array_shift(self::$values) ?? self::$default;
+
+        if ($next instanceof Throwable) {
+            throw $next;
+        }
+
+        return $next;
     }
 }

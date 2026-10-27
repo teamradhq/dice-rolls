@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Teamradhq\DiceRoll\Tests\Unit\Dice;
 
 use Generator;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\TestCase;
 use Teamradhq\DiceRoll\Dice\Compare;
 use Teamradhq\DiceRoll\Dice\Dice;
 use Teamradhq\DiceRoll\Dice\RollException;
 use Teamradhq\DiceRoll\Tests\Fixture\TestRandomiser;
+use Throwable;
 
 #[CoversClass(Compare::class)]
 final class CompareTest extends TestCase
@@ -86,6 +87,37 @@ final class CompareTest extends TestCase
     }
 
     /**
+     * @throws RollException
+     */
+    public static function provideInvalid(): Generator
+    {
+        yield 'a it not rollable' => [
+            1,
+            Dice::make()->roll(),
+            $exception = new InvalidArgumentException('All arguments must be an instance of Rollable.'),
+        ];
+
+        yield 'b it not rollable' => [
+            Dice::make()->roll(),
+            2,
+            $exception,
+        ];
+
+        yield 'a it not rolled' => [
+            Dice::make(),
+            Dice::make()->roll(),
+            $exception = new RollException('Both dice must be rolled for comparison.'),
+        ];
+
+        yield 'b it not rolled' => [
+            Dice::make(),
+            Dice::make()->roll(),
+            $exception,
+        ];
+
+    }
+
+    /**
      * @param callable(Compare, Dice, Dice): bool $test
      * @throws RollException
      */
@@ -99,9 +131,15 @@ final class CompareTest extends TestCase
         TestRandomiser::reset();
     }
 
-    #[DoesNotPerformAssertions]
-    public function test_guard_prevents_comparison(): void
+    /**
+     * @throws RollException
+     */
+    #[DataProvider('provideInvalid')]
+    public function test_guard_prevents_comparison(mixed $a, mixed $b, Throwable $throwable): void
     {
-        self::markTestIncomplete('Need to write case provider for expected exceptions.');
+        $this->expectExceptionMessageIsOrContains($throwable->getMessage());
+        $this->expectException($throwable::class);
+
+        Compare::guard($a, $b);
     }
 }

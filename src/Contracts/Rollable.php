@@ -4,8 +4,21 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Contracts;
 
+use Teamradhq\DiceRoll\Dice\Dice;
+use Teamradhq\DiceRoll\Dice\RollException;
+
 interface Rollable
 {
+    /**
+     * This dice has been rolled.
+     */
+    public function isRolled(): bool;
+
+    /**
+     * Get the result of a rolled dice.
+     */
+    public function result(): int;
+
     /**
      * The number of sides on the dice.
      */
@@ -27,12 +40,11 @@ interface Rollable
     public function disadvantage(): self;
 
     /**
-     * This dice has been rolled.
+     * Roll multiple times.
+     *
+     * @return non-empty-list<Dice>
+     *
+     * @throws RollException
      */
-    public function isRolled(): bool;
-
-    /**
-     * Get the result of a rolled dice.
-     */
-    public function result(): int;
+    public function times(int $times): array;
 }

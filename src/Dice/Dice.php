@@ -54,6 +54,30 @@ final class Dice implements Rollable
 
     /**
      * {@inheritDoc}
+     */
+    public function isRolled(): bool
+    {
+        return $this->result !== self::UNROLLED;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function result(): int
+    {
+        return $this->result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sides(): int
+    {
+        return $this->sides;
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * @throws RollException
      */
@@ -75,20 +99,12 @@ final class Dice implements Rollable
 
     /**
      * {@inheritDoc}
-     */
-    public function isRolled(): bool
-    {
-        return $this->result !== self::UNROLLED;
-    }
-
-    /**
-     * {@inheritDoc}
      *
      * @throws RollException
      */
     public function advantage(): self
     {
-        [$a, $b] = $this->rollTimes(2);
+        [$a, $b] = $this->times(2);
 
         return self::compare()->gte($a, $b) ? $a : $b;
     }
@@ -100,57 +116,9 @@ final class Dice implements Rollable
      */
     public function disadvantage(): self
     {
-        [$a, $b] = $this->rollTimes(2);
+        [$a, $b] = $this->times(2);
 
         return self::compare()->lte($a, $b) ? $a : $b;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function result(): int
-    {
-        return $this->result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function sides(): int
-    {
-        return $this->sides;
-    }
-
-    /**
-     * @throws RollException
-     */
-    private static function randomiser(): Randomiser
-    {
-        if (is_null(self::$randomiser)) {
-            self::setUp(new RandomInt);
-        }
-
-        if (self::$randomiser instanceof Randomiser === false) {
-            throw new RollException('Randomiser must be an instance of Randomiser.');
-        }
-
-        return self::$randomiser;
-    }
-
-    /**
-     * @throws RollException
-     */
-    private static function compare(): Compare
-    {
-        if (is_null(self::$compare)) {
-            self::setUp(compare: new Compare);
-        }
-
-        if (self::$compare instanceof Compare === false) {
-            throw new RollException('Compare must be an instance of Compare.');
-        }
-
-        return self::$compare;
     }
 
     /**
@@ -160,7 +128,7 @@ final class Dice implements Rollable
      *
      * @throws RollException
      */
-    private function rollTimes(int $times): array
+    public function times(int $times): array
     {
         if ($times < 1) {
             throw new RollException('Dice must be rolled at least once.');
@@ -174,5 +142,25 @@ final class Dice implements Rollable
         }
 
         return $rolls;
+    }
+
+    private static function randomiser(): Randomiser
+    {
+        if (!self::$randomiser instanceof Randomiser) {
+            self::setUp(new RandomInt);
+        }
+
+        /** @phpstan-ignore return.type (Setup call ensures property is not null.) */
+        return self::$randomiser;
+    }
+
+    private static function compare(): Compare
+    {
+        if (self::$compare instanceof Compare === false) {
+            self::setUp(compare: new Compare);
+        }
+
+        /** @phpstan-ignore return.type (Setup call ensures property is not null.) */
+        return self::$compare;
     }
 }

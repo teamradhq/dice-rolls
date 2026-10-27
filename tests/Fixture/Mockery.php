@@ -16,10 +16,11 @@ final class Mockery extends \Mockery
     {
         try {
             return parent::mock(...$args);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             throw new TestSetupException(
-                sprintf('Mockery error: %s', $exception->getMessage()),
-                previous: $exception,
+                sprintf('Mockery error: %s', $throwable->getMessage()),
+                (int) $throwable->getCode(),
+                previous: $throwable
             );
         }
     }

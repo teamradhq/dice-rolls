@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
 
 use Generator;
-use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Dice\RollException;
@@ -48,7 +47,7 @@ final class RollTableTestProvider
         string|PrimitiveType $type = PrimitiveType::Int,
         array $items = [1, 2, 3]
     ): RollTable {
-        self::$rollTable ??= new class($size, $type, self::dice()) extends RollTable {};
+        self::$rollTable ??= new class ($size, $type, self::dice()) extends RollTable {};
 
         foreach ($items as $item) {
             self::$rollTable->add($item);
@@ -178,7 +177,7 @@ final class RollTableTestProvider
 
         yield 'create a size lower than 2' => [
             function (RollTable $rollTable): void {
-                new class(1, PrimitiveType::Int) extends RollTable {};
+                new class (1, PrimitiveType::Int) extends RollTable {};
             },
             'Table size should be greater than 2: 1 given.',
         ];

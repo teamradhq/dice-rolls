@@ -68,6 +68,7 @@ abstract class RollTable implements Table
 
     public function list(): array
     {
+        /** @phpstan-ignore argument.type (Need to improve this implementation but good for now.) */
         return array_values(array_unique($this->items));
     }
 

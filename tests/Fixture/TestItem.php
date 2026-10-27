@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Tests\Fixture;
 
-final readonly class TestItem
+use Stringable;
+
+final readonly class TestItem implements Stringable
 {
     public function __construct(
         public string $name,
