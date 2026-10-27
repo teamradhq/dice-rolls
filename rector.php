@@ -3,15 +3,14 @@
 declare(strict_types=1);
 use Rector\CodeQuality\Rector\ClassMethod\LocallyCalledStaticMethodToNonStaticRector;
 use Rector\Config\RectorConfig;
+use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
 return RectorConfig::configure()
     ->withComposerBased(phpunit: true)
-    ->withPhpSets(php84: true)
     ->withPaths([
         __FILE__,
         __DIR__ . '/src',
@@ -27,18 +26,15 @@ return RectorConfig::configure()
         codingStyle: true,
         typeDeclarations: true,
         privatization: true,
-        naming: true,
         instanceOf: true,
         earlyReturn: true,
     )
     ->withSets([
-        LevelSetList::UP_TO_PHP_84,
+        LevelSetList::UP_TO_PHP_85,
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
-        SetList::EARLY_RETURN,
         SetList::TYPE_DECLARATION,
         SetList::PRIVATIZATION,
-        SetList::INSTANCEOF,
         SetList::CODING_STYLE,
         PHPUnitSetList::PHPUNIT_MOCK_TO_STUB,
         PHPUnitSetList::PHPUNIT_NARROW_ASSERTS,
@@ -46,7 +42,7 @@ return RectorConfig::configure()
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
     ])
     ->withRules([
-        DeclareStrictTypesRector::class,
+        PreferPHPUnitSelfCallRector::class,
     ])
-    ->withImportNames(removeUnusedImports: true)
+    ->withImportNames()
     ->withParallel();
