@@ -42,12 +42,12 @@ interface Table
      *
      * @param TableItem $item
      */
-    public function add(mixed $item, int $slots = 1): void;
+    public function add(mixed $item, int $rows = 1): void;
 
     /**
-     * Get the size of the table.
+     * Get the total rows of the table.
      */
-    public function size(): int;
+    public function rows(): int;
 
     /**
      * Get the table's item type.

@@ -76,21 +76,21 @@ abstract class RollTable implements Table
     /**
      * @throws RollException
      */
-    public function add(mixed $item, int $slots = 1): void
+    public function add(mixed $item, int $rows = 1): void
     {
-        if ($slots < 1) {
+        if ($rows < 1) {
             throw new RollException(sprintf(
                 'Item slots must be 1 or more. %s given.',
-                $slots
+                $rows
             ));
         }
 
-        while (--$slots >= 0) {
+        while (--$rows >= 0) {
             $this->addItem($item);
         }
     }
 
-    public function size(): int
+    public function rows(): int
     {
         return $this->size;
     }
@@ -110,7 +110,7 @@ abstract class RollTable implements Table
      */
     public function isFull(): bool
     {
-        return count($this->items) >= $this->size();
+        return count($this->items) >= $this->rows();
     }
 
     /**
@@ -153,7 +153,7 @@ abstract class RollTable implements Table
 
         return $this->getItem(match (true) {
             $index < 1 => 1,
-            $index > $this->size() => $this->size(),
+            $index > $this->rows() => $this->rows(),
             default => $index,
         });
     }
@@ -169,7 +169,7 @@ abstract class RollTable implements Table
             throw new RollException(sprintf(
                 'Cannot roll when table is not full. '
                 . 'Table size is %d, but only %d slots filled.',
-                $this->size(),
+                $this->rows(),
                 count($this->items),
             ));
         }

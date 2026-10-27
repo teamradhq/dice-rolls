@@ -66,7 +66,7 @@ final class RollTableTest extends TestCase
         /** @phpstan-ignore argument.type (Incorrect args will cause test failure.) */
         $rollTable = Provider::rollTable(...$args);
 
-        self::assertSame($expected['size'], $rollTable->size());
+        self::assertSame($expected['size'], $rollTable->rows());
         self::assertSame($expected['type'], $rollTable->type());
         self::assertSame($expected['list'], $rollTable->list());
         self::assertSame($expected['isFull'], $rollTable->isFull());
