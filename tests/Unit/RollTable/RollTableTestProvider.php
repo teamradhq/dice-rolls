@@ -6,6 +6,7 @@ namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
 
 use Generator;
 use Mockery\MockInterface;
+use Teamradhq\DiceRoll\Contracts\Modifier;
 use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Dice\RollException;
 use Teamradhq\DiceRoll\Enums\PrimitiveType;
@@ -131,6 +132,29 @@ final class RollTableTestProvider
             [3, PrimitiveType::Int, [1, 1, 1]],
             [...$defaults, 'list' => [1]],
         ];
+    }
+
+    /**
+     * @return Generator<string, array{1: (MockInterface&Modifier)|null, 1: int}>
+     * @throws TestSetupException
+     */
+    public static function modifiers(): Generator
+    {
+        yield 'no' => [null, 2];
+
+        $cases = [
+            'positive' => [1, 3],
+            'negative' => [-1, 1],
+            'positive out of bounds' => [10, 3],
+            'negative out of bounds' => [-10, 1],
+        ];
+
+        foreach ($cases as $label => [$value, $expected]) {
+            $modifier = Mockery::mock(Modifier::class);
+            $modifier->expects('value')->andReturn($value);
+
+            yield $label => [$modifier, $expected];
+        }
     }
 
     /**

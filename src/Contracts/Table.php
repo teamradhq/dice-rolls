@@ -14,21 +14,21 @@ interface Table
      *
      * @return TableItem
      */
-    public function roll(): mixed;
+    public function roll(?Modifier $modifier = null): mixed;
 
     /**
      * Roll to get a random item from the table with advantage.
      *
      * @return TableItem
      */
-    public function advantage(): mixed;
+    public function advantage(?Modifier $modifier = null): mixed;
 
     /**
      * Roll to get a random item from the table with disadvantage.
      *
      * @return TableItem
      */
-    public function disadvantage(): mixed;
+    public function disadvantage(?Modifier $modifier = null): mixed;
 
     /**
      * Get a list of all items in the table.

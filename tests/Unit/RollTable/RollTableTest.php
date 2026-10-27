@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
 
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
+use Teamradhq\DiceRoll\Contracts\Modifier;
 use Teamradhq\DiceRoll\Dice\RollException;
 use Teamradhq\DiceRoll\Enums\PrimitiveType;
 use Teamradhq\DiceRoll\RollTable\RollTable;
@@ -68,6 +70,20 @@ final class RollTableTest extends TestCase
         self::assertSame($expected['type'], $rollTable->type());
         self::assertSame($expected['list'], $rollTable->list());
         self::assertSame($expected['isFull'], $rollTable->isFull());
+    }
+
+    /**
+     * @param (MockInterface&Modifier)|null $mock
+     * @throws RollException
+     * @throws TestSetupException
+     */
+    #[TestDox('Roll with $_dataName modifier selects the correct item.')]
+    #[DataProviderExternal(Provider::class, 'modifiers')]
+    public function test_roll_modifier_is_applied(?MockInterface $mock, int $expected): void
+    {
+        Provider::dice()->expects('result')->andReturn(2);
+
+        self::assertSame($expected, Provider::rollTable()->roll($mock));
     }
 
     /**

@@ -19,7 +19,7 @@
         <testdoxHtml outputFile="coverage/testdox.html"/>
         <testdoxText outputFile="coverage/testdox.txt"/>
     </logging>
-    <coverage branchCoverage="true">
+    <coverage branchCoverage="true" pathCoverage="true">
         <report>
             <cobertura outputFile="coverage/cobertura.xml"/>
             <crap4j outputFile="coverage/crap4j.xml" threshold="50"/>

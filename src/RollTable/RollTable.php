@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\RollTable;
 
+use Teamradhq\DiceRoll\Contracts\Modifier;
 use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Contracts\Table;
 use Teamradhq\DiceRoll\Dice\Dice;
@@ -45,25 +46,25 @@ abstract class RollTable implements Table
     /**
      * @throws RollException
      */
-    public function roll(): mixed
+    public function roll(?Modifier $modifier = null): mixed
     {
-        return $this->rollItem();
+        return $this->rollItem($modifier);
     }
 
     /**
      * @throws RollException
      */
-    public function advantage(): mixed
+    public function advantage(?Modifier $modifier = null): mixed
     {
-        return $this->rollItem(true);
+        return $this->rollItem($modifier, true);
     }
 
     /**
      * @throws RollException
      */
-    public function disadvantage(): mixed
+    public function disadvantage(?Modifier $modifier = null): mixed
     {
-        return $this->rollItem(false);
+        return $this->rollItem($modifier, false);
     }
 
     public function list(): array
@@ -134,28 +135,35 @@ abstract class RollTable implements Table
     }
 
     /**
-     * @phpstan-assert-if-true TableItem $item
+     * Roll to get an item, applying the result modifier when provided.
+     *
+     * @return TableItem
+     *
+     * @throws RollException
      */
-    private function isValid(mixed $item): bool
+    private function rollItem(?Modifier $modifier = null, ?bool $isAdvantage = null): mixed
     {
-        if (is_string($this->type)) {
-            return $item instanceof $this->type;
+        $index = $this->getResult($isAdvantage);
+
+        if ($modifier instanceof Modifier === false) {
+            return $this->getItem($index);
         }
 
-        return match ($this->type) {
-            PrimitiveType::Bool => is_bool($item),
-            PrimitiveType::Float => is_float($item),
-            PrimitiveType::Int => is_int($item),
-            PrimitiveType::Number => is_float($item) || is_int($item),
-            PrimitiveType::String => is_string($item),
-        };
+        $index += $modifier->value();
+
+        return $this->getItem(match (true) {
+            $index < 1 => 1,
+            $index > $this->size() => $this->size(),
+            default => $index,
+        });
     }
 
     /**
-     * @return TableItem
-     * @throws RollException
+     * Get the result of a roll with or without advantage or disadvantage.
+     *
+     * @throws RollException When the table is not full, or there is an issue rolling the dice.
      */
-    private function rollItem(?bool $isAdvantage = null): mixed
+    private function getResult(?bool $isAdvantage = null): int
     {
         if (!$this->isFull()) {
             throw new RollException(sprintf(
@@ -172,16 +180,40 @@ abstract class RollTable implements Table
             null => $this->dice->roll(),
         };
 
-        $item = $this->items[$result->result()] ?? null;
+        return $result->result();
+    }
 
-        if (is_null($item)) {
+    /**
+     * Get the table item located at the slot corresponding to the provided index.
+     *
+     * @return TableItem
+     *
+     * @throws RollException When an item cannot be found.
+     */
+    private function getItem(int $index): mixed
+    {
+        $item = $this->items[$index] ?? null;
+
+        if ($item === null) {
             throw new RollException(sprintf(
                 'Item not found at slot %d.',
-                $result->result()
+                $index
             ));
         }
 
         /** @var TableItem $item */
         return $item;
+    }
+
+    /**
+     * @phpstan-assert-if-true TableItem $item
+     */
+    private function isValid(mixed $item): bool
+    {
+        if (is_string($this->type)) {
+            return $item instanceof $this->type;
+        }
+
+        return $this->type->matches($item);
     }
 }
