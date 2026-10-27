@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\Dice;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use Random\RandomException;
-use Teamradhq\DiceRoll\Dice\RandomInt;
+use Teamradhq\DiceRoll\RandomInt;
 
 #[CoversClass(RandomInt::class)]
 final class RandomIntTest extends TestCase

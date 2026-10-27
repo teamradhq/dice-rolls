@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\RollTable;
+namespace Teamradhq\DiceRoll;
 
 use Exception;
 

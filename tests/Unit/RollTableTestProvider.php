@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use Generator;
 use Mockery\MockInterface;
 use Teamradhq\DiceRoll\Contracts\Modifier;
 use Teamradhq\DiceRoll\Contracts\Rollable;
-use Teamradhq\DiceRoll\Dice\RollException;
-use Teamradhq\DiceRoll\Enums\PrimitiveType;
-use Teamradhq\DiceRoll\RollTable\RollTable;
+use Teamradhq\DiceRoll\PrimitiveType;
+use Teamradhq\DiceRoll\RollException;
+use Teamradhq\DiceRoll\RollTable;
 use Teamradhq\DiceRoll\Tests\Fixture\Mockery;
 use Teamradhq\DiceRoll\Tests\Fixture\TestItem;
 use Teamradhq\DiceRoll\Tests\Fixture\TestSetupException;
-use Teamradhq\DiceRoll\Tests\Unit\RollTable\RollTableTestProvider as Provider;
 
 final class RollTableTestProvider
 {
@@ -70,8 +69,8 @@ final class RollTableTestProvider
         if (self::$dice instanceof MockInterface === false) {
             self::$dice = Mockery::mock(Rollable::class);
             self::$dice->allows('roll')->andReturn(self::$dice);
-            Provider::dice()->expects('advantage')->andReturn(self::$dice);
-            Provider::dice()->expects('disadvantage')->andReturn(self::$dice);
+            self::$dice->expects('advantage')->andReturn(self::$dice);
+            self::$dice->expects('disadvantage')->andReturn(self::$dice);
         }
 
         return self::$dice;

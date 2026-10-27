@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Dice;
+namespace Teamradhq\DiceRoll;
 
 use InvalidArgumentException;
 use Teamradhq\DiceRoll\Contracts\Comparison;

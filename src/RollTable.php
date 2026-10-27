@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\RollTable;
+namespace Teamradhq\DiceRoll;
 
 use Teamradhq\DiceRoll\Contracts\Modifier;
 use Teamradhq\DiceRoll\Contracts\Rollable;
 use Teamradhq\DiceRoll\Contracts\Table;
-use Teamradhq\DiceRoll\Dice\Dice;
-use Teamradhq\DiceRoll\Dice\RollException;
-use Teamradhq\DiceRoll\Enums\PrimitiveType;
 
 /**
  * @template TableItem

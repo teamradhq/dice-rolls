@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\Dice;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use Generator;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Teamradhq\DiceRoll\Dice\Compare;
-use Teamradhq\DiceRoll\Dice\Dice;
-use Teamradhq\DiceRoll\Dice\RollException;
+use Teamradhq\DiceRoll\Compare;
+use Teamradhq\DiceRoll\Dice;
+use Teamradhq\DiceRoll\RollException;
 use Teamradhq\DiceRoll\Tests\Fixture\TestRandomiser;
 use Throwable;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Teamradhq\DiceRoll\Contracts;
 
-use Teamradhq\DiceRoll\Dice\Dice;
-use Teamradhq\DiceRoll\Dice\RollException;
+use Teamradhq\DiceRoll\Dice;
+use Teamradhq\DiceRoll\RollException;
 
 interface Rollable
 {

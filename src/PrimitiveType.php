@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Enums;
+namespace Teamradhq\DiceRoll;
 
 enum PrimitiveType: string
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Dice;
+namespace Teamradhq\DiceRoll;
 
 use Random\RandomException;
 use Teamradhq\DiceRoll\Contracts\Randomiser;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\RollTable;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -10,11 +10,11 @@ use PHPUnit\Framework\Attributes\DataProviderExternal;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use Teamradhq\DiceRoll\Contracts\Modifier;
-use Teamradhq\DiceRoll\Dice\RollException;
-use Teamradhq\DiceRoll\Enums\PrimitiveType;
-use Teamradhq\DiceRoll\RollTable\RollTable;
+use Teamradhq\DiceRoll\PrimitiveType;
+use Teamradhq\DiceRoll\RollException;
+use Teamradhq\DiceRoll\RollTable;
 use Teamradhq\DiceRoll\Tests\Fixture\TestSetupException;
-use Teamradhq\DiceRoll\Tests\Unit\RollTable\RollTableTestProvider as Provider;
+use Teamradhq\DiceRoll\Tests\Unit\RollTableTestProvider as Provider;
 
 #[CoversClass(RollTable::class)]
 final class RollTableTest extends TestCase

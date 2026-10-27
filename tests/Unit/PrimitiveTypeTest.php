@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\Enums;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
-use Teamradhq\DiceRoll\Enums\PrimitiveType;
+use Teamradhq\DiceRoll\PrimitiveType;
 
 #[CoversClass(PrimitiveType::class)]
 final class PrimitiveTypeTest extends TestCase

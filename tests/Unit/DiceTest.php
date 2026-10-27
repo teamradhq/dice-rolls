@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Teamradhq\DiceRoll\Tests\Unit\Dice;
+namespace Teamradhq\DiceRoll\Tests\Unit;
 
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -12,8 +12,8 @@ use PHPUnit\Framework\TestCase;
 use Random\RandomException;
 use ReflectionClass;
 use ReflectionException;
-use Teamradhq\DiceRoll\Dice\Dice;
-use Teamradhq\DiceRoll\Dice\RollException;
+use Teamradhq\DiceRoll\Dice;
+use Teamradhq\DiceRoll\RollException;
 use Teamradhq\DiceRoll\Tests\Fixture\TestRandomiser;
 
 #[CoversClass(Dice::class)]
